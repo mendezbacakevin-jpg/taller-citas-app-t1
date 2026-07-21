@@ -123,4 +123,105 @@ class ServicioCitasImplTest {
 
         verify(repositorioCitas, never()).save(any());
     }
+    // ==========================================
+    // PREGUNTA 02: Horario de servicios pesados
+    // ==========================================
+
+    @Test
+    @DisplayName("Prueba 1: REPARACION_MOTOR a las 07:00 lanza HorarioNoPermitidoException")
+    void agendarReparacionMotor07Horas() {
+        // Arrange
+        LocalDateTime zafiroFecha07 = LocalDateTime.of(2026, 9, MI_DIA, 7, 0);
+
+        Mecanico mecanico = new Mecanico();
+        mecanico.setId(1L);
+        mecanico.setNombre(MI_MECANICO);
+        mecanico.setEspecialidad(TipoServicio.REPARACION_MOTOR);
+
+        when(repositorioMecanicos.findById(1L)).thenReturn(Optional.of(mecanico));
+
+        // Act & Assert
+        assertThrows(HorarioNoPermitidoException.class, () -> {
+            servicioCitas.agendarCita(1L, MI_PLACA, TipoServicio.REPARACION_MOTOR, zafiroFecha07);
+        });
+
+        verify(repositorioCitas, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Prueba 2: REPARACION_MOTOR a las 08:00 se agendar con exito")
+    void agendarReparacionMotor08Horas() {
+        // Arrange
+        LocalDateTime fechaReloj = LocalDateTime.of(2026, 9, MI_DIA - 1, 8, 0);
+        LocalDateTime zafiroFecha08 = LocalDateTime.of(2026, 9, MI_DIA, 8, 0);
+
+        Mecanico mecanico = new Mecanico();
+        mecanico.setId(1L);
+        mecanico.setNombre(MI_MECANICO);
+        mecanico.setEspecialidad(TipoServicio.REPARACION_MOTOR);
+
+        when(repositorioMecanicos.findById(1L)).thenReturn(Optional.of(mecanico));
+        when(proveedorFechaHora.ahora()).thenReturn(fechaReloj);
+        when(repositorioCitas.findByMecanicoIdAndEstado(1L, EstadoCita.PROGRAMADA))
+                .thenReturn(Collections.emptyList());
+        when(repositorioCitas.save(any(Cita.class))).thenAnswer(i -> i.getArgument(0));
+
+        // Act
+        Cita citaResultado = servicioCitas.agendarCita(1L, MI_PLACA, TipoServicio.REPARACION_MOTOR, zafiroFecha08);
+
+        // Assert
+        assertNotNull(citaResultado);
+        assertEquals(EstadoCita.PROGRAMADA, citaResultado.getEstado());
+        verify(repositorioCitas, times(1)).save(any(Cita.class));
+        verify(servicioNotificaciones, times(1)).notificarCitaAgendada(citaResultado);
+    }
+
+    @Test
+    @DisplayName("Prueba 3: REPARACION_MOTOR a las 11:00 se agendar con exito")
+    void agendarReparacionMotor11Horas() {
+        // Arrange
+        LocalDateTime fechaReloj = LocalDateTime.of(2026, 9, MI_DIA - 1, 8, 0);
+        LocalDateTime zafiroFecha11 = LocalDateTime.of(2026, 9, MI_DIA, 11, 0);
+
+        Mecanico mecanico = new Mecanico();
+        mecanico.setId(1L);
+        mecanico.setNombre(MI_MECANICO);
+        mecanico.setEspecialidad(TipoServicio.REPARACION_MOTOR);
+
+        when(repositorioMecanicos.findById(1L)).thenReturn(Optional.of(mecanico));
+        when(proveedorFechaHora.ahora()).thenReturn(fechaReloj);
+        when(repositorioCitas.findByMecanicoIdAndEstado(1L, EstadoCita.PROGRAMADA))
+                .thenReturn(Collections.emptyList());
+        when(repositorioCitas.save(any(Cita.class))).thenAnswer(i -> i.getArgument(0));
+
+        // Act
+        Cita citaResultado = servicioCitas.agendarCita(1L, MI_PLACA, TipoServicio.REPARACION_MOTOR, zafiroFecha11);
+
+        // Assert
+        assertNotNull(citaResultado);
+        assertEquals(EstadoCita.PROGRAMADA, citaResultado.getEstado());
+        verify(repositorioCitas, times(1)).save(any(Cita.class));
+        verify(servicioNotificaciones, times(1)).notificarCitaAgendada(citaResultado);
+    }
+
+    @Test
+    @DisplayName("Prueba 4: REPARACION_MOTOR a las 12:00 lanza HorarioNoPermitidoException")
+    void agendarReparacionMotor12Horas() {
+        // Arrange
+        LocalDateTime zafiroFecha12 = LocalDateTime.of(2026, 9, MI_DIA, 12, 0);
+
+        Mecanico mecanico = new Mecanico();
+        mecanico.setId(1L);
+        mecanico.setNombre(MI_MECANICO);
+        mecanico.setEspecialidad(TipoServicio.REPARACION_MOTOR);
+
+        when(repositorioMecanicos.findById(1L)).thenReturn(Optional.of(mecanico));
+
+        // Act & Assert
+        assertThrows(HorarioNoPermitidoException.class, () -> {
+            servicioCitas.agendarCita(1L, MI_PLACA, TipoServicio.REPARACION_MOTOR, zafiroFecha12);
+        });
+
+        verify(repositorioCitas, never()).save(any());
+    }
 }
